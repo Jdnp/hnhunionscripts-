@@ -1,0 +1,556 @@
+//#! name = Pearl
+ 
+var ACCNAME = "";         //account name
+var CHARNAME = "";   //character name
+include("jBotAPI");
+inventory = checkInventory();
+jDropLastWindow();
+GetRoute();
+var startPos = jMyCoords();
+var route = [];
+var CurioName = ["pearl","flotsam","itsybitsy","itsyweb"];
+function GetRoute() {
+var startPos = jMyCoords();
+var route = [];
+route[0] = jCoord(startPos.x+-198,startPos.y+572);
+route[1] = jCoord(route[0].x+11,route[0].y+286);
+route[2] = jCoord(route[1].x+374,route[1].y+121);
+route[3] = jCoord(route[2].x+517,route[2].y+22);
+route[4] = jCoord(route[3].x+473,route[3].y+22);
+route[5] = jCoord(route[4].x+484,route[4].y+55);
+route[6] = jCoord(route[5].x+407,route[5].y+77);
+route[7] = jCoord(route[6].x+407,route[6].y+88);
+route[8] = jCoord(route[7].x+385,route[7].y+121);
+route[9] = jCoord(route[8].x+407,route[8].y+55);
+route[10] = jCoord(route[9].x+176,route[9].y+-286);
+route[11] = jCoord(route[10].x+165,route[10].y+-308);
+route[12] = jCoord(route[11].x+121,route[11].y+-286);
+route[13] = jCoord(route[12].x+132,route[12].y+-264);
+route[14] = jCoord(route[13].x+121,route[13].y+-275);
+route[15] = jCoord(route[14].x+286,route[14].y+11);
+route[16] = jCoord(route[15].x+22,route[15].y+330);
+route[17] = jCoord(route[16].x+-253,route[16].y+385);
+route[18] = jCoord(route[17].x+-308,route[17].y+341);
+route[19] = jCoord(route[18].x+-121,route[18].y+308);
+route[20] = jCoord(route[19].x+-231,route[19].y+330);
+route[21] = jCoord(route[20].x+-132,route[20].y+187);
+route[22] = jCoord(route[21].x+-330,route[21].y+0);
+route[23] = jCoord(route[22].x+-352,route[22].y+-55);
+route[24] = jCoord(route[23].x+-374,route[23].y+-66);
+route[25] = jCoord(route[24].x+-308,route[24].y+-55);
+route[26] = jCoord(route[25].x+-308,route[25].y+-77);
+route[27] = jCoord(route[26].x+-297,route[26].y+-77);
+route[28] = jCoord(route[27].x+-341,route[27].y+-44);
+route[29] = jCoord(route[28].x+-330,route[28].y+-66);
+route[30] = jCoord(route[29].x+-341,route[29].y+-66);
+route[31] = jCoord(route[30].x+-352,route[30].y+-88);
+route[32] = jCoord(route[31].x+-286,route[31].y+-88);
+route[33] = jCoord(route[32].x+-275,route[32].y+-88);
+route[34] = jCoord(route[33].x+-253,route[33].y+-99);
+route[35] = jCoord(route[34].x+-297,route[34].y+-132);
+route[36] = jCoord(route[35].x+-308,route[35].y+-143);
+route[37] = jCoord(route[36].x+-308,route[36].y+-143);
+route[38] = jCoord(route[37].x+-319,route[37].y+-132);
+route[39] = jCoord(route[38].x+-275,route[38].y+-143);
+route[40] = jCoord(route[39].x+-286,route[39].y+187);
+route[41] = jCoord(route[40].x+-209,route[40].y+264);
+route[42] = jCoord(route[41].x+-264,route[41].y+242);
+route[43] = jCoord(route[42].x+-165,route[42].y+242);
+route[44] = jCoord(route[43].x+-99,route[43].y+253);
+route[45] = jCoord(route[44].x+264,route[44].y+264);
+route[46] = jCoord(route[45].x+253,route[45].y+231);
+route[47] = jCoord(route[46].x+264,route[46].y+187);
+route[48] = jCoord(route[47].x+286,route[47].y+231);
+route[49] = jCoord(route[48].x+385,route[48].y+121);
+route[50] = jCoord(route[49].x+385,route[49].y+22);
+route[51] = jCoord(route[50].x+407,route[50].y+-22);
+route[52] = jCoord(route[51].x+396,route[51].y+0);
+route[53] = jCoord(route[52].x+330,route[52].y+11);
+route[54] = jCoord(route[53].x+165,route[53].y+77);
+route[55] = jCoord(route[54].x+11,route[54].y+198);
+route[56] = jCoord(route[55].x+-242,route[55].y+132);
+route[57] = jCoord(route[56].x+-407,route[56].y+55);
+route[58] = jCoord(route[57].x+-374,route[57].y+0);
+route[59] = jCoord(route[58].x+-363,route[58].y+11);
+route[60] = jCoord(route[59].x+-341,route[59].y+11);
+route[61] = jCoord(route[60].x+-319,route[60].y+0);
+route[62] = jCoord(route[61].x+-275,route[61].y+-121);
+route[63] = jCoord(route[62].x+-198,route[62].y+-264);
+route[64] = jCoord(route[63].x+-209,route[63].y+-231);
+route[65] = jCoord(route[64].x+0,route[64].y+0);
+route[66] = jCoord(route[65].x+-209,route[65].y+-220);
+route[67] = jCoord(route[66].x+-385,route[66].y+-429);
+route[68] = jCoord(route[67].x+-264,route[67].y+-11);
+route[69] = jCoord(route[68].x+-297,route[68].y+121);
+route[70] = jCoord(route[69].x+-253,route[69].y+187);
+route[71] = jCoord(route[70].x+-264,route[70].y+253);
+route[72] = jCoord(route[71].x+-165,route[71].y+242);
+route[73] = jCoord(route[72].x+-99,route[72].y+286);
+route[74] = jCoord(route[73].x+99,route[73].y+308);
+route[75] = jCoord(route[74].x+187,route[74].y+220);
+route[76] = jCoord(route[75].x+231,route[75].y+231);
+route[77] = jCoord(route[76].x+198,route[76].y+220);
+route[78] = jCoord(route[77].x+253,route[77].y+220);
+route[79] = jCoord(route[78].x+77,route[78].y+330);
+route[80] = jCoord(route[79].x+-55,route[79].y+374);
+route[81] = jCoord(route[80].x+-154,route[80].y+264);
+route[82] = jCoord(route[81].x+-110,route[81].y+176);
+route[83] = jCoord(route[82].x+-110,route[82].y+330);
+route[84] = jCoord(route[83].x+-198,route[83].y+319);
+route[85] = jCoord(route[84].x+-110,route[84].y+176);
+route[86] = jCoord(route[85].x+-143,route[85].y+121);
+route[87] = jCoord(route[86].x+-154,route[86].y+-220);
+route[88] = jCoord(route[87].x+77,route[87].y+-396);
+route[89] = jCoord(route[88].x+176,route[88].y+-429);
+route[90] = jCoord(route[89].x+176,route[89].y+-418);
+route[91] = jCoord(route[90].x+176,route[90].y+-385);
+route[92] = jCoord(route[91].x+-44,route[91].y+-396);
+route[93] = jCoord(route[92].x+-253,route[92].y+-286);
+route[94] = jCoord(route[93].x+-242,route[93].y+-242);
+route[95] = jCoord(route[94].x+-253,route[94].y+-330);
+route[96] = jCoord(route[95].x+-209,route[95].y+-231);
+route[97] = jCoord(route[96].x+-11,route[96].y+-330);
+route[98] = jCoord(route[97].x+363,route[97].y+-253);
+route[99] = jCoord(route[98].x+297,route[98].y+-253);
+route[100] = jCoord(route[99].x+286,route[99].y+-264);
+route[101] = jCoord(route[100].x+242,route[100].y+-209);
+route[102] = jCoord(route[101].x+253,route[101].y+-209);
+route[103] = jCoord(route[102].x+253,route[102].y+-242);
+route[104] = jCoord(route[103].x+242,route[103].y+-231);
+route[105] = jCoord(route[104].x+187,route[104].y+-198);
+route[106] = jCoord(route[105].x+176,route[105].y+-187);
+route[107] = jCoord(route[106].x+187,route[106].y+-198);
+route[108] = jCoord(route[107].x+198,route[107].y+-220);
+route[109] = jCoord(route[108].x+66,route[108].y+-363);
+route[110] = jCoord(route[109].x+-99,route[109].y+-297);
+route[111] = jCoord(route[110].x+-77,route[110].y+-319);
+route[112] = jCoord(route[111].x+-176,route[111].y+-319);
+route[113] = jCoord(route[112].x+99,route[112].y+-319);
+route[114] = jCoord(route[113].x+187,route[113].y+-198);
+route[115] = jCoord(route[114].x+341,route[114].y+154);
+route[116] = jCoord(route[115].x+165,route[115].y+-44);
+route[117] = jCoord(route[116].x+319,route[116].y+-110);
+route[118] = jCoord(route[117].x+330,route[117].y+-88);
+route[119] = jCoord(route[118].x+242,route[118].y+-88);
+route[120] = jCoord(route[119].x+176,route[119].y+-110);
+route[121] = jCoord(route[120].x+132,route[120].y+-77);
+route[122] = jCoord(route[121].x+154,route[121].y+143);
+route[123] = jCoord(route[122].x+352,route[122].y+77);
+route[124] = jCoord(route[123].x+143,route[123].y+231);
+route[125] = jCoord(route[124].x+187,route[124].y+363);
+route[126] = jCoord(route[125].x+88,route[125].y+363);
+route[127] = jCoord(route[126].x+22,route[126].y+275);
+route[128] = jCoord(route[127].x+-22,route[127].y+319);
+route[129] = jCoord(route[128].x+-22,route[128].y+297);
+route[130] = jCoord(route[129].x+55,route[129].y+88);
+  return route;
+}
+ 
+function whereYouLoggedOut() {
+   jLogin(ACCNAME);
+   while(!jHaveCharlist()) jSleep(700);
+   jPrint(jSelectChar(CHARNAME));
+   var logwnd = jWaitNewWindow(CHARNAME, 120000);
+   jSleep(100);
+   logwnd.pushButton(2);
+}
+ 
+function Relogin() {
+   jLogout();
+}
+ 
+function PreviousCoord(Coord) {
+   if (jMyCoords()==Coord) return;
+   jAbsClick(Coord, 1, 0);
+   jWaitStartMove();
+   while (jMyCoords().dist(Coord) > 10) jSleep(200);
+}
+ 
+function NewArrayWithout1stElement(arr) {
+   newarr = [];
+   for (var i = 1; i < arr.length; i++) {
+   newarr[i-1] = arr[i];
+   }
+return newarr;
+}
+ 
+ 
+function GetStuff() {
+   var Stuff = jGetObjects(400,jCoord(0,0),"mussel");
+   StartCoord = jMyCoords();
+   while ((inventory.freeSlots() > 3)&&(Stuff.length>0)) {
+      AwayFromGround();
+      jPrint(Stuff.length);
+      Stuff[0].doClick(3,0);
+      jWaitPopup(900);
+      jSelectContextMenu("Pick");
+      jWaitMove(6000);
+      jWaitProgress(10000);
+      Stuff = NewArrayWithout1stElement(Stuff);
+   }  
+      Stuff = jGetObjects(400,jCoord(0,0),"flotsam");
+   if (Stuff.length>0) {
+      AwayFromGround();
+      Stuff[0].doClick(3,0);
+      jWaitPopup(900);
+      jSelectContextMenu("Pick");
+      jWaitMove(6000);
+      jWaitProgress(10000);
+   }
+   AwayFromGround();
+   PreviousCoord(StartCoord);
+}
+ 
+ function dropSpiders(){
+ var spider = inventory.getItems("invobjs/itsybitsy");
+ if (spider.length > 0) {
+         spider[0].drop();
+                 jPrint("Wywalam pajaka");
+         jWaitDrop();
+      }
+ }
+function GoHome () {
+   jOffsetClick (jCoord(0,3),1,2);
+   jSleep (500);
+   jSendDoubleAction("theTrav", "hearth");
+    jPrint("Teleportuje sie do domku");
+   jWaitProgress(300000);
+}
+ 
+function checkInventory() {
+   if(!jHaveWindow("Inventory")) {
+      jToggleInventory();
+      while(!jHaveWindow("Inventory")) jSleep(100);
+           jPrint("Sprawdzam Inventory");
+   }
+   return jGetWindow("Inventory").getInventories()[0];
+}
+ 
+ 
+function goToCauldron () {
+   var cauldron = jFindObjectByName("cauldron",40);
+   var offs = cauldron.position();
+   offs = offs.add(0, -10);
+   jPFMove(offs);
+   jWaitStartMove();
+   jPrint("Podchodze do kotla");
+   while (jIsMoving() || jMyCoords().dist(offs) > 10) jSleep(200);
+   return cauldron;
+}
+function goToBarrel() {
+   var barrel = jFindObjectByName("barrel",30);
+   var offs = barrel.position();
+   offs = offs.add(10, 0);
+   jPFMove(offs);
+   jWaitStartMove();
+    jPrint("Podchodze do beczki");
+   while (jIsMoving() || jMyCoords().dist(offs) > 10) jSleep(200);
+   return barrel;
+}
+function checkCauldron () {
+   var cauldron = jFindObjectByName("cauldron",20);
+   if(!jHaveWindow("Cauldron")) {
+      jDoClick(cauldron.getID(), 3, 0);
+          jPrint("Sprawdzam kociol");
+      while(!jHaveWindow("Cauldron"))
+      jSleep(100);
+   }
+   var waterInCauldron = jGetWindow("Cauldron").getMeterValue(1);
+    jPrint(waterInCauldron);
+   var fuelInCauldron = jGetWindow("Cauldron").getMeterValue(2);
+    jPrint(fuelInCauldron);
+   water = waterInCauldron;
+   fuel = fuelInCauldron;
+   return water, fuel;
+}
+function getWater () {
+   inventory = checkInventory();
+   barrel = goToBarrel();
+   goToBarrel();
+   jPrint("Podchodze do beczki");
+   var bucket = inventory.getItems("buckete")[0];
+   var bucket_coord = bucket.coord()
+   var bucket_name = bucket.resName();
+   bucket.take();
+   jWaitDrag();
+   barrel.interactClick(0);
+   while (jGetDraggingItem().resName() == bucket_name) jSleep(100);
+   jPrint("Podchodze do kotla z wiadrem wody");
+   cauldron = goToCauldron ();
+   goToCauldron ();
+   cauldron.interactClick(0);
+   while (jGetDraggingItem().resName() !== bucket_name) jSleep(100);
+   inventory.drop(bucket_coord);
+   jWaitDrop();
+   jPrint("Kocil napelniony");
+ 
+}
+ 
+function getBranch() {
+   var inventory = checkInventory();
+   var open_cupboard = jGetWindow("Cupboard").getInventories()[0];
+   var branch = open_cupboard.getItems("invobjs/branch");
+   if (branch.length > 0) {
+      for (var i = 0; i < 2; i++) {
+         var open_cupboard = jGetWindow("Cupboard").getInventories()[0];
+         var branch = open_cupboard.getItems("invobjs/branch");
+         branch[i].transfer();
+         jPrint("Pobralem patyki");
+         jSleep(200);
+      }
+   }
+}
+ 
+ 
+function getFuel () {
+   inventory = checkInventory();
+   var cupboards = jGetObjects(50, jCoord(0, 0), "terobjs/cupboard");
+   for (var i = 0; i < cupboards.length; i++) {
+      var fuelInInventory = inventory.getItems("invobjs/branch");
+      if (fuelInInventory.length != 2) {
+         var offs = cupboards[i].position();
+         offs = offs.add(0, 10);
+         jPFMove(offs);
+         jWaitStartMove();
+         while (jIsMoving() || jMyCoords().dist(offs) > 10) jSleep(200);
+         jDoClick(cupboards[i].getID(),3,0);
+         jSleep(1000);
+         var open_cupboard = jGetWindow("Cupboard");
+         getBranch();
+         jSleep(1000);
+      }
+   }
+   goToCauldron ();
+   for (var i = 0; i < 2; i++) {
+      cauldron = goToCauldron ();
+      var branch = inventory.getItems("branch")[0];
+      branch.take();
+      jWaitDrag();
+      cauldron.interactClick(0);
+          jPrint("Zasililem kociol patykami");
+      jSleep(1000);
+         
+   }
+}
+ 
+function boilingMussel () {
+   var cauldron = jFindObjectByName("cauldron",20);
+   var musselInInventory = inventory.getItems("invobjs/mussel");
+   inventory = checkInventory();
+   if(!jHaveWindow("Cauldron")) {
+      jDoClick(cauldron.getID(), 3, 0);
+      while(!jHaveWindow("Cauldron")) jSleep(100);
+   }
+   jGetWindow("Cauldron").pushButton("Light");
+   jPrint("Podpalilem kociol");
+   jSleep (500);
+   jSendDoubleAction("craft","cmussel");
+   jPrint("Gotuje muszelki");
+   jWaitCraft();
+   while (musselInInventory.length > 0) {
+      jCraftItem(false);
+      jWaitProgress();
+      var boiledMusselInInventory = inventory.getItems("invobjs/mussel-boiled");
+      if (boiledMusselInInventory.length > 0) {
+         boiledMusselInInventory[0].drop();
+                 jPrint("Wywalam muszle");
+         jWaitDrop();
+      }
+      musselInInventory = inventory.getItems("invobjs/mussel");
+   }
+   jPrint("Skonczylem gotowac muszle");
+   jSendAction("carry");
+   jSleep (500);
+   jDoClick(cauldron.getID(), 1, 0);
+   jSleep (1000);
+   jOffsetClick(jCoord(0,0), 1, 0);
+   jSleep (1000);
+   jOffsetClick(jCoord(0,1), 3, 0);
+   jPrint("Kocial zagaszony");
+   jSleep (1000);
+}
+
+function DropCurioToChest() {
+   chest = jFindObjectByName("lchest",100);
+   chestCoord = chest.position();
+   chestAround =jCoord(chestCoord.x+10,chestCoord.y);
+   jPFMove(chestAround);
+   waitPFEndMove();
+   while (jIsMoving() || jMyCoords().dist(chestAround) > 10) jSleep(100);
+   chest.doClick(3,0);
+   while(!jHaveWindow("Chest")) jSleep(100);
+   while (inventory.getItems(CurioName).length > 0) {
+      inventory.getItems(CurioName)[0].transferSuchAll();
+      jSleep(500);
+   }
+}
+ 
+function travelCount() {
+   var buffs = jGetBuffs();
+   for (var i = 0; i < buffs.length; i++) {
+      if (buffs[i].name().indexOf("Travel Weariness") >= 0) {
+         return buffs[i].meter();
+      }
+   }
+   return 0;
+}
+function GoExit(){
+ jPrint("--------------------------------------Nowa runda---------------------------------");
+   door = jFindObjectByName("door-inn",100);
+   jPrint(door);
+   doorCoord = door.position();
+   doorAround = jCoord(doorCoord.x,doorCoord.y-10);
+   jPFMove(doorAround);
+        waitPFEndMove();
+                jPrint("Podchodze do drzwi");
+   while (jIsMoving() || jMyCoords().dist(doorAround) > 10) jSleep(100);
+   door.doClick(3,0);
+   jWaitMove();
+   jSleep(500);
+}
+function GoDrinkWine() {
+   jOffsetClick(jCoord(0,1), 1, 0);
+   basket = jFindObjectByName("wbasket",100);
+   basketCoord = basket.position();
+   basketAround =jCoord(basketCoord.x-10,basketCoord.y);
+   jPFMove(basketAround);
+   waitPFEndMove();
+   while (jIsMoving() || jMyCoords().dist(basketAround) > 5) jSleep(100);
+   basket.doClick(3,0);
+   while(!jHaveWindow("Basket")) jSleep(100);
+   BasketInventory = jGetWindow("Basket").getInventories()[0];
+   var buckets = BasketInventory.getItems("bucket-wine");
+   if (buckets.length > 0) {
+      BasketInventory.sortItems(buckets, "amount", false);
+      var bucket = buckets[0];
+      var bucket_coord = bucket.coord();
+      if (bucket.isActual()) {
+         bucket.take();
+         jWaitDrag();
+         var glasses = BasketInventory.getItems("glass");
+         if (glasses.length > 0) {
+            var glass = glasses[0];
+            if (glass.isActual()) {
+               glass.itemact(0);
+               jSleep(500);
+               BasketInventory.drop(bucket_coord);
+               jWaitDrop();
+            }
+         }
+      }
+   }
+   var glasses = BasketInventory.getItems("glass");
+   if (glasses.length > 0) {
+      var glass = glasses[0];
+      if (glass.isActual()) {
+         glass.iact();
+         if (jWaitPopup(actionTimeout)) {
+            jSelectContextMenu("Drink");
+            jWaitProgress();
+         }
+      }
+   }
+}
+ 
+function GoToBoat() {
+   var cross = jFindObjectByName("crossroads",100);
+   var crossCoord = cross.position();
+   var crossAround =jCoord(crossCoord.x,crossCoord.y-10);//x+10 - postać podejdzie od wschodu
+                                                                                                                                                                                //x-10- postać podejdzie od zachodu
+                                                                                                                                                                                //y+10 - postać podejdzie od południa
+                                                                                                                                                                                //y-10 - postać podejdzie od północy
+   jPFMove(crossAround);
+   waitPFEndMove();
+   while (jIsMoving() || jMyCoords().dist(crossAround) > 2) jSleep(100);
+   cross.doClick(3,0);
+   while(!jHaveWindow("ciachoinside")) jSleep(100);
+   jGetWindow("ciachoinside").pushButton(1);
+   jSleep(4000);
+   AwayFromCross();
+   boat = jFindObjectByName("boat",100);
+   boatCoord = boat.position();
+   boatAround =jCoord(boatCoord.x+20,boatCoord.y);
+   jPFMove(boatAround);
+   while (jIsMoving() || jMyCoords().dist(boatAround) > 10) jSleep(100);
+   boat.doClick(3,0);
+   jSleep(2000);
+   jSelectContextMenu("Avast!");
+   jWaitMove();
+}
+ 
+function AwayFromCross() {
+   Cross = jFindObjectByName("crossroads",100);
+   CrossCoord = Cross.position();
+   MyCoord = jMyCoords();
+   CrossAroundN = jCoord(CrossCoord.x,CrossCoord.y-10);
+   CrossAroundE = jCoord(CrossCoord.x+10,CrossCoord.y);
+   CrossAroundS = jCoord(CrossCoord.x,CrossCoord.y+10);
+   CrossAroundW = jCoord(CrossCoord.x-10,CrossCoord.y);
+   DistN = MyCoord.dist(CrossAroundN);
+   DistE = MyCoord.dist(CrossAroundE);
+   DistS = MyCoord.dist(CrossAroundS);
+   DistW = MyCoord.dist(CrossAroundW);
+   DistMin = DistN;
+   CoordDistMin = CrossAroundN;
+   if (DistE < DistMin){ DistMin = DistE; CoordDistMin = CrossAroundE; }
+   if (DistS < DistMin){ DistMin = DistS; CoordDistMin = CrossAroundS; }
+   if (DistW < DistMin){ DistMin = DistW; CoordDistMin = CrossAroundW; }
+   jAbsClick(CoordDistMin, 1, 0);
+   jWaitMove();
+}
+ 
+function isTileGround(coord) {
+   if (!(jGetTileType(coord) == 0 || jGetTileType(coord) == 1)) return true
+   else return false;
+}
+ 
+function AwayFromGround() {
+   if (!((isTileGround(jCoord(0,-1))) || (isTileGround(jCoord(1,0))) || (isTileGround(jCoord(0,1))) || (isTileGround(jCoord(-1,0))))) return;
+   var offs = jMyCoords();
+   if (isTileGround(jCoord(0,-1))) offs = offs.add(0,20);
+   if (isTileGround(jCoord(1,0))) offs = offs.add(-20,0);
+   if (isTileGround(jCoord(0,1))) offs = offs.add(0,-20);
+   if (isTileGround(jCoord(-1,0))) offs = offs.add(20,0);
+   jAbsClick(offs, 1, 0);
+   jWaitStartMove();
+   jSleep(500);
+}
+ 
+function main() {
+   while (1) {
+        route = GetRoute();
+      for(var i = 0; i < route.length; i++) {
+	     dropSpiders();
+         GetStuff();
+         PreviousCoord(route[i]);
+         if(jGetStamina() < 50) drinkWater();
+      }
+      jSleep(1000);
+      GoHome ();
+      jSleep(1000);
+      goToCauldron ();
+      checkCauldron ();
+      if (water < 33) {
+         getWater();
+      }
+      if (fuel < 13) {
+         getFuel();
+      }
+      boilingMussel ();
+      DropCurioToChest();
+          jPrint("Czekam 12 min");
+        //jSleep(3*1);
+          jPrint("Minelo 5 min, pozostalo 6 min")
+       // jSleep(3*1);
+          jPrint("Minelo 5 min, pozostala 1 min")
+          jSleep(100);
+          jPrint("Skonczylem czekac");
+          GoExit();
+          if (travelCount() >=90){
+          GoDrinkWine();
+          }
+      GoToBoat();
+   }
+}
+ 
+main();

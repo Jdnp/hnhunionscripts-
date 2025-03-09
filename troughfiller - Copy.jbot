@@ -1,0 +1,186 @@
+//#! uniq = TROUGHFILLERBOT
+//#! name = Trough filler
+//#! tooltip = Fills selected troughs with beets
+//#! icon = paginae/build/trough
+var start = 0
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+//Pathfinder
+include("pathfinder");
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+function checkInventory() {
+   if (!jHaveWindow("Inventory")) {
+      jToggleInventory();
+      while (!jHaveWindow("Inventory"))
+         jSleep(100);
+   }
+   return jGetWindow("Inventory").getInventories()[0];
+}
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+
+function fillTrough(o) {
+   var inv = checkInventory();
+   var food = inv.getItems("beetroot", "carrot");
+   if (food.length == 0)
+      return false;
+   if (inv.getItems("beetrootweird").length > 0) {
+      jToConsole("Found a weird, exiting");
+      takeItemsToContainers(inv.getItems("beetrootweird"), jGetObjects(50, jCoord(0, 0), "lchest"), "Chest", 1);
+   }
+   food[0].take();
+   jWaitDrag();
+   while (1) {
+      if (!jIsDragging()) {
+         if (inv.getItems("beetroot", "carrot").length > 0) {
+            if (food[0].isActual())
+               food[0].take();
+            else
+               continue;
+            jWaitDrag();
+            continue;
+         } else
+            break;
+      }
+      o.interactClick(1);
+      jSleep(100);
+   }
+   if (jIsDragging()) {
+      jDropObject(0);
+      jWaitDrop();
+   }
+   return true;
+}
+
+function goToTrough(tr, spos) {
+   var offs = tr.position();
+   if (spos.x > tr.position().x)
+      offs = offs.add(27, 0);
+   else
+      offs = offs.add(-27, 0);
+	  jMoveStep(jCoord(1,0));
+	  jWaitEndMove();
+	  jPrint("Going to Trough");
+	  while(jMyCoords().dist(tr.position()) > 11){
+    if	(jIsPathFree(tr.position()) ) {}
+else {
+		jPFMoveOffset_LX(tr.position(), 1);
+		waitPFEndMove();
+		}  
+		}
+}
+
+function getTroughMeter(tr) {
+   jDoClick(tr.getID(), 3, 0);
+   while (!jHaveWindow("Trough"))
+      jSleep(500);
+   var meter = jGetWindow("Trough").getMeterValue(1);
+   return meter;
+}
+
+function selectTroughs() {
+   var ta = [];
+   var ids = []
+   while (1) {
+      var trough = jSelectObject("Select trough, click on the ground to stop selecting");
+      if (trough == null) break;
+      var name = trough.name();
+      if (name.indexOf("trough") != -1) {
+         if (ids.indexOf(trough.getID()) != -1) {
+            jToConsole("ERROR: This trough has been already selected.");
+            continue;
+         }
+         ta.push(trough);
+         ids.push(trough.getID());
+         jToConsole("Troughs count: " + ta.length);
+      }
+      else break;
+   }//troughs
+   return ta;
+}
+
+function pickFood(count) {
+	 jMoveStep(jCoord(1,0));
+	 waitPFEndMove();
+   var food = null;
+   var inv = checkInventory();
+   if (inv.freeSlots() < count)
+      count = inv.freeSlots();
+	  food = jFindObjectByName("items/beetroot", 50);
+	  jPrint("Getting Food");
+	while (inv.getItems("beetroot", "carrot").length != count && jFindObjectByName("items/beetroot", 50) != null) {
+		var j = 0;
+		jPFMoveOffset_LX(food.position(), 0);
+		waitPFEndMove();
+		while (inv.getItems("beetroot", "carrot").length != count) {
+			food = jFindObjectByName("items/beetroot", 50); 
+			if (food == null) {
+			return 0;}
+		/* if	(jIsPathFree(food.position()) ) {}
+		 else {	jPFMoveOffset_LX(food.position(), 1);
+		waitPFEndMove(); }  */
+		jDoClick(food.getID(), 3, 0);
+		jSleep(400);
+		j++;
+		if (inv.getItems("beetroot", "carrot").length > count){
+			inv.getItems("beetroot", "carrot").dropSuchAll();
+		}
+		}
+   }
+   return inv.getItems("beetroot", "carrot").length;
+}
+
+function main() {
+   jDropLastWindow();
+   checkInventory();
+   var startPoint = jMyCoords();
+   var lastPoint = jMyCoords();
+   var food = jGetObjects(100, jCoord(0,0),"items/beetroot", "items/carrot", 9);
+   jToConsole(food.length +" food objects");
+   var troughs = selectTroughs();
+   if (troughs.length == 0)
+      return;
+   var currentTrough = 0;
+   goToTrough(troughs[currentTrough], startPoint);
+   
+   while (1) {
+      if (currentTrough == troughs.length)
+         return;
+		 jMoveStep(jCoord(1,0));
+		 waitPFEndMove();
+       goToTrough(troughs[currentTrough], startPoint);
+	   	 jMoveStep(jCoord(1,0));
+	 waitPFEndMove();
+      var m = getTroughMeter(troughs[currentTrough]);
+      if (m > 96) {
+		jToConsole("Trough "+ currentTrough +" is full");
+         currentTrough++;
+         continue;
+      }
+      	 jMoveStep(jCoord(1,0));
+	 waitPFEndMove();
+      //how much carrots do we need to this trough (2 carrots - 1 value)
+      if (m > 4)
+         m = (97 - m) * 2;
+      else
+         m = (100 - m) * 2;
+      //go to last pos
+      //jAbsClick(lastPoint, 1, 0);
+      //jWaitMove(20000);
+      //picks food
+      pickFood(m);
+      //   return; //no more carrots
+      //remember last pos
+      lastPoint = jMyCoords();
+      //go to trough
+      goToTrough(troughs[currentTrough], startPoint);
+      //fill it
+      fillTrough(troughs[currentTrough]);
+   }
+}
+
+main();

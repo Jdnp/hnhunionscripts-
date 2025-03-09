@@ -1,0 +1,241 @@
+//#! uniq = Script generator
+//#! name = Script generator
+//#! tooltip = Learning bots to move right way.
+//#! icon = gfx/invobjs/itsyweb
+
+include("jBotAPI(2)");
+
+// rabbit jackalope
+// "gfx/invobjs/jackalope"
+// "gfx/kritter/hare/body/standing/standing-0"
+
+function main()
+{
+	// select forager type
+	var modeList = ["Mountain", "Swamp", "Cave", "Forest", "Lake", "OmgWipe!", "Guard", "Shocked_Forager_"]; //, "ChaoticCreature"];
+	var modeWnd = jGUIWindow(jCoord(250, 250), jCoord(220, 20 + modeList.length*30+30), "Forager bot maker");
+	for (var n = 0; n < modeList.length; n++)
+	{
+		jGUIButton(modeWnd, jCoord(10, 10 + n*30), 200, modeList[n]);
+	}	
+	jGUIButton(modeWnd, jCoord(10, 10 + modeList.length*30 + 10), 200, "Exit");
+	var modeText = modeWnd.waitButtonClick();
+	modeWnd.destroy();
+	if (modeText == "Exit") return;
+
+	// tune forager
+	var selectWindow = jGUIWindow(jCoord(250, 250), jCoord(280, 440), "Forager bot maker");
+	var regionNameEnt = jGUIEntry(selectWindow, jCoord(10, 10), jCoord(260, 20), "Region name [coords]");
+	var accNameEnt = jGUIEntry(selectWindow, jCoord(10, 40), jCoord(260, 20), "Account name");
+	var charNameEnt = jGUIEntry(selectWindow, jCoord(10, 70), jCoord(260, 20), "Character name");
+
+	var curiosAllNm = []; // name
+	var curiosAllId = []; // world id
+	var curiosAllPk = []; // pack id
+	var curiosAllCollDef = []; // collect default
+	var curiosAllDropDef = []; // keep default min quality
+	var modeNum = -1;
+	if (modeText == modeList[0]) // mountain
+	{
+		curiosAllNm = ["Edelweiss", "Frog's crown", "Glimmermoss", "Feldspar"];
+		curiosAllId = ["edelweiss", "frogscrown", "glimmermoss", "feldspar"];
+		curiosAllPk = ["edelweiss", "frogscrown", "glimmermoss", "feldspar"];
+		curiosAllCollDef = [true, true, false, false];
+		curiosAllDropDef = [20, 20, 20, 50];
+		modeNum = 0;
+	}
+	if (modeText == modeList[1]) // swamp
+	{
+		curiosAllNm = ["Bluebell", "Toadstool", "Lady's Mantle", "Bloated bolete"];
+		curiosAllId = ["bluebell", "toadstool", "ladysmantle", "bloatedbolete"];
+		curiosAllPk = ["bluebell", "toadstool", "ladysmantle", "bloatedbolete"];
+		curiosAllCollDef = [true, true, false, true];
+		curiosAllDropDef = [1, 25, 100, 15];
+		modeNum = 1;
+	}
+	if (modeText == modeList[2]) // cave
+	{
+		curiosAllNm = ["Glimmermoss", "Stalagoom", "Cavebulb", "Cave clay"];
+		curiosAllId = ["glimmermoss", "stalagoom", "cavebulb", "caveclay"];
+		curiosAllPk = ["glimmermoss", "stalagoom", "cavebulb", "clay-cave"];
+		curiosAllCollDef = [true, true, false, false];
+		curiosAllDropDef = [20, 20, 1, 65];
+		modeNum = 2;
+	}
+	if (modeText == modeList[3]) // forest
+	{
+		curiosAllNm = ["Bloated bolete", "Blueberries", "Chantrelles", "Rustroot"];
+		curiosAllId = ["bloatedbolete", "blueberry", "chantrelle", "rustroot"];
+		curiosAllPk = ["bloatedbolete", "blueberry", "chantrelle", "rustroot"];
+		curiosAllCollDef = [true, false, false, false];
+		curiosAllDropDef = [20, 1, 1, 1];
+		modeNum = 3;
+	}
+	if (modeText == modeList[4]) // lake
+	{
+		curiosAllNm = ["Flotsam", "Mussel", "Gray clay"];
+		curiosAllId = ["flotsam", "mussel", "grayclay"];
+		curiosAllPk = ["flotsam", "mussel", "clay-gray"];
+		curiosAllCollDef = [true, false, false];
+		curiosAllDropDef = [1, 1, 1];
+		modeNum = 4;
+	}
+	if (modeText == modeList[5]) // noobs   (spindlytaproot - spindlytaproot)
+	{
+		curiosAllNm = ["WWW", "Nettle", "Clover", "Candleberry"];
+		curiosAllId = ["windweed", "stingingnettle", "fourleafclover", "candleberry"];
+		curiosAllPk = ["windweed", "stingingnettle", "fourleafclover", "candleberry"];
+		curiosAllCollDef = [true, false, false, false];
+		curiosAllDropDef = [1, 1, 1, 1];
+		modeNum = 5;
+	}
+	if (modeText == modeList[6]) // shocked
+	{
+		curiosAllNm = [];
+		curiosAllId = [];
+		curiosAllPk = [];
+		curiosAllCollDef = [];
+		curiosAllDropDef = [];
+		modeNum = 6;
+	}
+	if (modeText == modeList[7]) // shocked
+	{
+		curiosAllNm = ["Bluebell also"];
+		curiosAllId = ["bluebell"];
+		curiosAllPk = ["bluebell"];
+		curiosAllCollDef = [true];
+		curiosAllDropDef = [1];
+		modeNum = 7;
+	}
+
+	var curiosBoxesColl = [];
+	var curiosBoxesDrop = [];
+	for (var n = 0; n < curiosAllNm.length; n++)
+	{
+		curiosBoxesColl[n] = jGUICbox(selectWindow, jCoord(10, 100 + n*30), "Collect "+curiosAllNm[n]);
+		curiosBoxesColl[n].setChecked(curiosAllCollDef[n]);
+		curiosBoxesDrop[n] = jGUIEntry(selectWindow, jCoord(160, 100 + n*30 + 14), jCoord(50, 20), curiosAllDropDef[n].toString());
+	}
+
+	var startBtn = "Start";
+	var addPointBtn = "AddPoint";
+	var saveBtn = "Save";
+	var exitBtn = "Exit";
+
+	jGUIButton(selectWindow, jCoord(10, 250), 260, startBtn);
+	jGUIButton(selectWindow, jCoord(10, 305), 260, addPointBtn);
+	jGUIButton(selectWindow, jCoord(10, 360), 260, saveBtn);
+	jGUIButton(selectWindow, jCoord(220, 410), 50, exitBtn);
+
+	selectWindow.toggleCloseButton();
+
+
+	var uniqName = ["Mountain_Forager_", "Swamp_Forager_", "Cave_Forager_", "Forest_Forager_", "Lake_Forager_", "OmgWipe_Forager_", "Guard_", "Shocked_Forager_"];
+	var tooltipText	=	["Collects curios at mountain", "Collects curios at swamp", "Collects curios in cave", "Collects curios it the forest", "Collects curios at lake", "Collects noobs items", "Oversees your area for rams and enemy activity", "Collects Shocked frogs"];
+	var iconName = ["gfx/invobjs/herbs/edelweiss", "gfx/invobjs/herbs/chimingbluebell", "gfx/invobjs/herbs/cavebulb", "gfx/invobjs/herbs/bloatedbolete", "gfx/invobjs/herbs/flotsam", "gfx/invobjs/herbs/fourleafclover", "gfx/hud/skills/ranger", "gfx/invobjs/frog"];
+	var mainFunctionName = ["CollectMount2", "CollectSwamp2", "CollectMount2", "CollectSwamp2", "CollectLake2", "CollectSwamp2", "CheckRams", "CollectShocked"];
+
+	var wpts = [];
+
+	var startPos = jMyCoords(0, 0);
+	var isStarted = false;
+	while (true)
+	{
+		var btext = selectWindow.waitButtonClick();
+		if (btext == startBtn)
+		{
+			jSendDoubleAction("theTrav", "hearth");
+			jInGamePrint("Teleporting to HF. Wait.");
+			jWaitProgress(actionTimeout);
+			startPos = jMyCoords();
+			isStarted = true;
+			wpts = [];
+			jInGamePrint("Started!");
+		}
+		if (btext == addPointBtn)
+		{
+			var pos = jMyCoords();
+			wpts.push(jCoord((pos.x-startPos.x)/11, (pos.y-startPos.y)/11));
+			jInGamePrint("New waypoint, offset = "+(pos.x-startPos.x)/11+", "+(pos.y-startPos.y)/11);
+		}
+
+		if (btext == saveBtn)
+		{
+			var regionName = regionNameEnt.getText();
+			var accName = accNameEnt.getText();
+			var charName = charNameEnt.getText();
+
+			var f = new java.io.FileWriter("New_Forager.jbot");
+
+			f.write("//#! uniq = "+uniqName[modeNum]+Random(10000000, 100000000)+"\n");
+			f.write("//#! name = "+charName+" - "+regionName+"\n");
+			f.write("//#! tooltip = "+tooltipText[modeNum]+"\n");
+			f.write("//#! icon = "+iconName[modeNum]+"\n");
+
+			f.write("\n");
+			f.write('include(\"jBotAPI(2)\");'+"\n");
+			f.write("\n");
+			f.write('// Before start set camera mode "Fixed" or "Borderizer"'+"\n");
+			f.write("\n");
+			f.write('var accName = "'+accName+'"; // account name'+"\n");
+			f.write('var charName = "'+charName+'"; // character name'+"\n");
+			f.write("\n");
+
+			var collectStr = "";
+			var nonCollectStr = "";
+			var dropStr = "";
+			var nonDropStr = "";
+			var dropQualityStr = "";
+			var nonDropQualityStr = "";
+			for (var n = 0; n < curiosAllId.length; n++)
+			{
+				if (curiosBoxesColl[n].isChecked())
+				{
+					collectStr = collectStr + '"' + curiosAllId[n] + '", ';
+					dropStr = dropStr + '"' + curiosAllPk[n] + '", ';
+					dropQualityStr = dropQualityStr + curiosBoxesDrop[n].getInt() + ', ';
+				}
+				else
+				{
+					nonCollectStr = nonCollectStr + '"' + curiosAllId[n] + '", ';
+					nonDropStr = nonDropStr + '"' + curiosAllPk[n] + '", ';
+					nonDropQualityStr = nonDropQualityStr + curiosBoxesDrop[n].getInt() + ', ';
+				}
+				curiosBoxesDrop[n].setText(curiosBoxesDrop[n].getInt().toString());
+			}
+			f.write('collectCurios = ['+collectStr+']; // '+nonCollectStr+"\n");
+			f.write('dropCurios = ['+dropStr+']; // '+nonDropStr+"\n");
+			f.write('dropQuality = ['+dropQualityStr+']; // '+nonDropQualityStr+"\n");
+
+			f.write("\n");
+			f.write("// Path depends on the marsh mountain or lake etc"+"\n");
+			f.write("var startPos = jCoord(0, 0);"+"\n");
+			f.write("var waypoints ="+"\n");
+			f.write("["+"\n");
+			for (var i = 0; i < wpts.length; i++)
+			{
+				f.write("	["+wpts[i].x+", "+wpts[i].y+"],"+"\n");
+			}
+			f.write("];"+"\n");
+			f.write("\n");
+			f.write("function main()"+"\n");
+			f.write("{"+"\n");
+			f.write("	"+mainFunctionName[modeNum]+"(accName, charName, collectCurios, dropCurios, dropQuality, startPos, waypoints);"+"\n");
+			f.write("}"+"\n");
+			f.write("\n");
+			f.write("main();"+"\n");
+
+			f.close();
+
+			jInGamePrint("Script file <New_Forager.jbot> created. Rename and put it to /Scripts directory");
+		}
+
+		if (btext == exitBtn)
+		{
+			break;
+		}
+	}
+	selectWindow.destroy();
+}
+
+main();

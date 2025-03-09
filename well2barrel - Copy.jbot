@@ -1,0 +1,188 @@
+//#! name = Well to Barrel
+//#! uniq = WELLTOBARRELBOT
+//#! icon = gfx/terobjs/barrel
+function getRandomArbitary(min, max)
+{
+  return Math.random() * (max - min) + min;
+}
+
+function jPFMove_LX(point) {
+   point = jTilify(point);
+   var MyX = jMyCoords().x;
+   var MyY = jMyCoords().y;
+      
+   jPFMove(point);
+   cycles = 0;
+   while (MyX != point.x || MyY != point.y)
+   {
+      jPrint("jPFMove_LX My =" + MyX + " " + MyY + " - " + point.x + " " + point.y);
+      jSleep(1000);
+      MyX = jMyCoords().x;
+      MyY = jMyCoords().y;
+      if(cycles == 10)
+      {      
+         jPrint("jPFMove_LX trying to move again");
+         jOffsetClick(jCoord(getRandomArbitary(-2,2),getRandomArbitary(-2,2)),1,0);
+         jSleep(500);
+         jPFMove(point);
+         cycles = 0
+      }
+      cycles++;
+   }
+   jPrint("jPFMove ended");
+}
+
+function jPFMoveOffset_LX(point, offset) {
+
+   offsMoveS=jCoord(0,offset);
+   offsMoveE=jCoord(offset,0);
+   offsMoveW=jCoord(-offset,0);
+   offsMoveN=jCoord(0,-offset);
+   
+   while (1) {
+      if(jPFMove(point.add(offsMoveS.mul(11))) > 0) {
+         jPFMove_LX(point.add(offsMoveS.mul(11)));
+         return offsMoveS;
+      }
+      
+      if(jPFMove(point.add(offsMoveE.mul(11))) > 0) {
+         jPFMove_LX(point.add(offsMoveE.mul(11)));
+      return offsMoveE;
+      }
+      
+      if(jPFMove(point.add(offsMoveW.mul(11))) > 0) {
+         jPFMove_LX(point.add(offsMoveW.mul(11)));
+      return offsMoveW;
+      }   
+      
+      if(jPFMove(point.add(offsMoveN.mul(11))) > 0) {
+         jPFMove_LX(point.add(offsMoveN.mul(11)));
+      return offsMoveN;
+      }
+      jPrint("jPFMoveOffset_LX can't find path");
+//      break;
+
+         jOffsetClick(jCoord(getRandomArbitary(-2,2),getRandomArbitary(-2,2)),1,0);
+         jSleep(500);
+      
+   }
+}
+//function checks inventory
+//and opens it, if it closed
+function checkInventory()
+{
+   if(!jHaveWindow("Inventory"))
+   {
+      jToggleInventory();
+      while(!jHaveWindow("Inventory"))
+         jSleep(100);
+   }
+}
+
+//like main() at C
+function main()
+{
+   
+   var RAD = 6;
+   var well = jFindObjectByName("well", 10); //well
+   var barrels = jGetObjects(RAD, jCoord(0, 0), "barrel"); //array of barrels
+   jPrint("barrels = " + barrels.length);
+   if(barrels[0] == 0)
+      {
+         jPrint("Cannot find barrels. Script failed.");
+         return;
+      }
+   //if no wells around
+   if(!well)
+   {
+      jPrint("Cannot find a well. Script failed.");
+      return;
+   }
+   //well founded
+   checkInventory();
+   for(i=0;i<barrels.length;i++)
+   {
+   //if no barrels at array
+   if(barrels[i] == 0) {
+      jPrint("barrels[i] == 0");
+      break;
+   }
+   while(1)
+      {
+         jPrint("WHILE WHILE");
+         
+            if (jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0] == undefined){
+      if (jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0] == undefined){
+        jToConsole("No bucket in inventory. Script stopped");
+        jExit();
+      }
+      else{
+        jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0].iact();
+        jWaitPopup();
+        jSelectContextMenu("Empty");
+        while (jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0] == undefined){
+          jSleep(100);
+        }
+      }
+   }
+         
+         var bucket = jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0];
+         jPrint("WHILE 2");
+         if(bucket == null) {
+            jPrint("bucket == null");
+            break;
+         }
+            jPrint("WHILE 3");
+         var bc = bucket.coord();
+         jPrint("bc = " + bc);
+         bucket.take();
+         jWaitDrag(5000);
+         jSleep(100);
+         tile = jPFMoveOffset_LX(well.position(),1);
+         well.interactClick(0);
+         var drag = jGetDraggingItem();
+         //waits for the filled bucket
+         while(drag.resName().indexOf("water") == -1)
+            jSleep(100);
+         jGetWindow("Inventory").getInventories()[0].drop(bc);
+         jWaitDrop(5000);
+         jSleep(100);
+         tile = jPFMoveOffset_LX(barrels[i].position(),1);
+         jDoClick(barrels[i].getID(), 3, 0);
+         //waits for barrel window
+         jWaitWindow("Barrel");
+         jSleep(1000);
+         if(jGetWindow("Barrel").getLabelText(1).indexOf("100.0") != -1) //barrel is full
+         {
+            //empty bucket
+            var bucket2 = jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0];
+            bucket2.iact();
+            jWaitPopup(5000);
+            jSelectContextMenu("Empty");
+            while(bucket2.resName().indexOf("water") > -1)
+               jSleep(100);
+               tile = jPFMoveOffset_LX(well.position(),1);
+            jDoClick(well, 1, 0);
+            jSleep(700);
+            break; //from while(1)
+         }
+         //if barrel isn't full
+         var bucket2 = jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0];
+         var bc2 = bucket2.coord();
+         bucket2.take();
+         jWaitDrag(5000);
+         //tile = jPFMoveOffset_LX(barrels[i].position(),1);
+         barrels[i].interactClick(0);
+         var drag2 = jGetDraggingItem();
+            jSleep(1000);
+         jGetWindow("Inventory").getInventories()[0].drop(bc2);
+         jWaitDrop(5000);
+         jSleep(100);
+         jAbsClick(barrels[i].position().add(tile.mul(11)), 1, 0);
+      }//while 1
+   }//for all barrels
+}
+
+//calls the main
+jDropLastWindow();
+main();

@@ -1,0 +1,16 @@
+//#! name = MusselEater
+//#! tooltip = very simple
+//#! uniq = eatmussel
+
+	var carrot = jGetWindow("Cupboard").getInventories()[0].getItems("mussel-boiled");
+	for (var i = 0; carrot.length > i; i++ ) {
+		var carot = carrot[i]
+		while (carot.isActual()) {
+
+			carot.iact();
+			jWaitPopup(60*1000);
+			jSelectContextMenu("Eat");
+			jSleep(500);
+            }
+            if (carot.isActual()){jSleep(700)}
+         }

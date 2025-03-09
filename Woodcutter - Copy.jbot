@@ -1,0 +1,404 @@
+//#! uniq = WOODCUTTER
+//#! tooltip = Cut trees and tp logs to totem
+//#! name = Woodcutter
+//#! icon = gfx/invobjs/small/log
+
+include("pathfinder");
+include("jBotAPI");
+include("jBotAPITalon");
+include("jBotAPIArcanist");
+include("jBotErik");
+
+//// Logs need ////////////////////////////////////
+var logsMax = 550;
+
+//// Where to drop logs, offset from totem ////////
+var waypoints = 
+[
+	[6, 0],
+//	[-6, 0],
+//	[-47, -35],
+//	[-55, 2],
+];
+
+///////////////////////////////////////////////////
+function Finish(itext)
+{
+	jPrint("Exit - "+itext);
+	jExit();
+}
+
+function DropFromCursor()
+{
+	while (jIsDragging())
+	{
+		jDropObject(0);
+		jSleep(300);
+	}
+}
+function DropWoodBlocksFromInv()
+{
+	var inv = checkInventory();
+	var items = inv.getItems("wood");
+	if (items.length > 0)
+	{	
+		items[0].dropSuchAll();
+		//waits dropping
+		while (inv.getItems("wood").length > 0) jSleep(300);
+	}
+}
+function DropFromInv(resName)
+{
+	var inv = checkInventory();
+	var items = inv.getItems(resName);
+	if (items.length > 0)
+	{	
+		items[0].dropSuchAll();
+		//waits dropping
+		while (inv.getItems(resName).length > 0) jSleep(300);
+	}
+}
+function FromCursorToInv(resName)
+{
+	DropFromCursor();
+	var res = jFindObjectByName(resName, 1);
+	if (res != null)
+	{
+		res.doClick(3, 0);
+		jSleep(500);
+		if (jIsDragging()) DropFromCursor();
+	}
+}
+function GetInvFree()
+{
+	var inv = checkInventory();
+	return inv.freeSlots();
+}
+function GetInvResCount(resName)
+{
+	var inv = checkInventory();
+	var invItems = inv.getItems(resName);
+	return invItems.length;
+}
+function GetWindow(objWndName)
+{
+	var wnd;
+	while (true)
+	{
+		wnd = jGetWindow(objWndName);
+		if (wnd != null) return wnd;
+		jSleep(300);
+	}
+}
+
+//---------------------------------------------------------------------
+// chop trees
+//---------------------------------------------------------------------
+function TakeAxe()
+{
+	var inv = checkInventory();
+	var equip = checkEquipment();
+	if (equip.name(6) == "Stone Axe") return;
+	if (equip.name(7) == "Stone Axe") return;
+	while (true)
+	{
+		equip.transfer(6);
+		equip.transfer(7);
+		if (equip.name(6) == "") break;
+		if (equip.name(7) == "") break;
+		jSleep(300);
+	}
+
+	DropFromCursor();
+
+	var axe = inv.getItems("axe");
+	if (axe.length == 0) Finish("no axe");
+	while (!jIsDragging())
+	{
+		axe[0].take();
+		jSleep(300);
+	}
+	while (jIsDragging())
+	{
+		equip.dropTo(6);
+		jSleep(300);
+	}
+}
+function TakeShovel()
+{
+	var inv = checkInventory();
+	var equip = checkEquipment();
+	if (equip.name(6) == "Shovel") return;
+	if (equip.name(7) == "Shovel") return;
+	while (true)
+	{
+		equip.transfer(6);
+		equip.transfer(7);
+		if (equip.name(6) == "") break;
+		if (equip.name(7) == "") break;
+		jSleep(300);
+	}
+
+	DropFromCursor();
+
+	var shovel = inv.getItems("shovel");
+	if (shovel.length == 0) Finish("no shovel");
+	while (!jIsDragging())
+	{
+		shovel[0].take();
+		jSleep(300);
+	}
+	while (jIsDragging())
+	{
+		equip.dropTo(6);
+		jSleep(300);
+	}
+}
+
+function RemoveStump(stump)
+{
+	resetCursor();
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+
+	drinkWater();
+
+	TakeShovel();
+
+	stump.doClick(3, 0);
+	jWaitPopup(actionTimeout);
+	if (jHavePopup())
+	{
+		jSelectContextMenu("Remove");
+		jWaitProgress(actionTimeout);
+	}
+
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+}
+
+function ChopTree(tree)
+{
+	resetCursor();
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+
+	//drinkWater();
+
+	TakeAxe();
+
+	tree.doClick(3, 0);
+	jWaitPopup(actionTimeout);
+	if (jHavePopup())
+	{
+		jSelectContextMenu("Chop");
+		jWaitProgress(actionTimeout);
+	}
+	jSleep(500);
+}
+
+function TakeLog()
+{
+	var offsetAround = [[11, 11], [11, 0], [11, -11], [0, 11], [0, -11], [-11, 11], [-11, 0], [-11, -11]];
+	var treesList = ["/stump", "/trees/fir", "/trees/pine"];
+
+	while (true)
+	{
+		jSleep(1000);
+
+		if (!MoveRandomDirection(3)) return false;
+
+		if (!noMoreWine())
+		{		
+			var logsAll = jGetObjects(45, jCoord(0, 0), "/trees/log");
+			for (var i = 0; i < logsAll.length; i++)
+			{
+				var log = logsAll[i];
+				if (!jIsPathFree(log.position()))	continue;
+
+				// debug
+				//MoveToPos(log.position());
+				MoveToPosSafe(log.position());
+
+				resetCursor();
+				DropFromCursor();
+			
+				var me = jGob(jGetMyID());
+				jSendAction("carry");
+				jWaitCursor("chi", actionTimeout);
+				log.doClick(1, 0);
+				while (!me.isCarrying())
+				{
+					jSleep(1000);
+				}
+				return true;
+			}
+		}
+
+		// no log avaliable - chop tree and remove stumps
+		treeEnd:
+		for (var k = 0; k < treesList.length; k++)
+		{
+			var treesAll = jGetObjects(75, jCoord(0, 0), treesList[k]);
+			for (var i = 0; i < treesAll.length; i++)
+			{
+				var tree = treesAll[i];
+
+				var num = -1;	
+				for (var n = 0; n < offsetAround.length; n++)
+				{
+					var pos = jCoord(tree.position().x + offsetAround[n][0], tree.position().y + offsetAround[n][1]);
+					if (jIsPathFree(pos))
+					{
+						num = n;
+						break;
+					}
+				}	
+				if (num == -1) continue;
+
+				var startPos = jMyCoords();
+
+				var pos = jCoord(tree.position().x + offsetAround[num][0], tree.position().y + offsetAround[num][1]);
+				// debug
+				//MoveToPos(pos);
+				MoveToPosSafe(pos);
+		
+				// debug
+				//if (CheckHostile()) return false;
+
+				if ((tree.name() == "gfx/terobjs/trees/pine/stump") || (tree.name() == "gfx/terobjs/trees/fir/stump"))
+				{
+					RemoveStump(tree);
+				}
+				else
+				{
+					ChopTree(tree);
+				}
+
+				// debug
+				//MoveToPos(startPos);
+				MoveToPosSafe(startPos);
+
+				break treeEnd;
+			}
+		}
+	}
+	Finish("no more trees in range");
+	return true;
+}
+
+function TeleportToTotem()
+{
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+
+	// drink wine
+	if (travelCount() > 85)
+	{
+		while (noMoreWine())
+		{
+			jSleep(2*1000);
+			return false;
+		}
+		drinkWine();
+	}
+	
+	// teleport
+	jSendDoubleAction("theTrav", "village");
+	jWaitProgress(actionTimeout);
+
+	while (true)
+	{
+		if (jFindObjectByName("vclaim", 10) != null) break;
+		jSleep(1000);
+	}
+	return true;
+}
+
+function UnloadWoodLog()
+{
+	// ��������
+	var totem = jFindObjectByName("vclaim", 10);
+	if (totem == null) Finish("no totem O_o");
+
+	// move to factory
+	var initPos = totem.position();
+	var startPos = jCoord(0, 0);
+	for (var i = 0; i < waypoints.length; i++)
+	{
+		MoveToPosSafe(jCoord(initPos.x + (waypoints[i][0] - startPos.x)*11, initPos.y + (waypoints[i][1] - startPos.y)*11));
+	}
+
+	// drop
+	var me = jGob(jGetMyID());
+	if (me == null) Finish("no me? O_o");
+	if(me.isCarrying())
+	{
+		jAbsClick(jMyCoords(), 3, 0);
+		while (me.isCarrying())
+		{
+			jSleep(1000);
+		}
+	}
+
+	// print count
+	var logsList = jGetObjects(2, jCoord(0, 0), "/trees/log");
+	jPrint("logs count = "+logsList.length);
+	return logsList.length;
+}
+
+function ChopAndDeliverTrees()
+{
+	var equip = checkEquipment();
+	var axeEquipped = false;
+	if (equip.name(6) == "Stone Axe") axeEquipped = true;
+	if (equip.name(7) == "Stone Axe") axeEquipped = true;
+	var shovelEquipped = false;
+	if (equip.name(6) == "Shovel") shovelEquipped = true;
+
+	var inv = checkInventory();
+	var axe = inv.getItems("axe");
+	var shovel = inv.getItems("shovel");
+	var buckets = inv.getItems("bucket-wine");
+	var glass = inv.getItems("glass-wine");
+	if (((axe.length == 0)&&(!axeEquipped))||((shovel.length == 0)&&(!shovelEquipped))||(buckets.length == 0)||(glass.length == 0))
+	{
+		sayArea("Need axe, shovel, bucket with wine and wine glass!");
+		Finish("Must be equipped with axe, shovel, bucket with wine and wine glass.");
+	}
+
+	jSetSpeed(1);
+	TeleportHF();
+	while (true)
+	{
+		if (!TakeLog())
+		{ // hostile spotted!
+			jPrint("fukin bear!");
+			TeleportToTotem();
+			sayArea("fukin bear!");
+			WaitRespawn();
+			continue;
+		}
+		if (!TeleportToTotem())
+		{
+			jLogout();
+			Finish("finished. cannot teleport to totem. possibly no wine.")
+		}
+		var logsCount = UnloadWoodLog();
+		if (logsCount > logsMax)
+		{
+			Finish("work done. "+logsMax+" logs ready.");
+		}
+		TeleportHF();
+	}
+}
+
+//---------------------------------------------------------------------
+function main()
+{
+	jDropLastWindow();
+
+	ChopAndDeliverTrees();
+}
+
+main();

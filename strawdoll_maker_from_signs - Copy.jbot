@@ -1,0 +1,60 @@
+//#! uniq = arcanist_strawdoll
+//#! name = Straw Doll Maker
+//#! icon = gfx/invobjs/strawdoll
+
+
+
+include("pathfinder");
+include("jBotAPI");
+include("jBotErik");
+include("jBotAPIArcanist");
+
+jToConsole("Select Straw Signs")
+var strawsigns = selectInRect_HoriDecider("sign");
+
+jToConsole("Select Hemp Signs")
+var hempsigns = selectInRect_HoriDecider("sign");
+
+jToConsole("Select LCs");
+var lcs = selectInRect_HoriDecider("lchest");
+
+while(1){
+	var craftno = toInt((checkInventory().freeSlotsCoords().length -2)/ 6);
+	jPrint("Craft No = " + craftno);
+	var strawno = 4 * craftno;
+	var hempno = 2 * craftno;
+	jPrint("Getting Straw");
+	getItemsFromSigns("straw", strawsigns, "Bee Hive", strawno, 1, 3);
+	jPrint("Getting hemp");
+	getItemsFromSigns("flaxfibre", hempsigns, "Demijohn", hempno, 1, 2);
+	var count = 0;
+	jSendDoubleAction("craft", "strawdoll");
+	jSleep(1000);
+	while(checkInventory().getItems("strawdoll").length < craftno){
+	  // crafting
+	  jPrint("Crafting");
+		jCraftItem(true);
+		jWaitProgress(actionTimeout);
+		jSleep(500);
+		dropFromCursor(1);
+		drinkWater(30);
+		jSleep(1000);
+		var dollsonground = [];
+		var dollsonground = jGetObjects(50, jCoord(0, 0), ["strawdoll"]);
+		if (dollsonground.length > 0){
+				if (dollsonground != null){
+					goNearPosition( dollsonground[0].position(), 1);
+					jDoClick(dollsonground[0].getID(), 3, 0);
+					jSleep(500);
+					var dollsonground = jGetObjects(50, jCoord(0, 0), ["strawdoll"]);
+				}
+				else jSleep(2000);
+		}
+		
+	}
+	takeItemsToContainers ("strawdoll", lcs, "Chest", 1);
+}
+
+
+
+

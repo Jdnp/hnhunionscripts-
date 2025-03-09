@@ -1,0 +1,35 @@
+//#! name = Animal Killer
+//#! uniq = arcanist_killer
+// Globals
+
+
+include("jBotAPI");
+include("jBotAPIArcanist");
+include("pathfinder");
+
+function killAnimal(animal){
+	if (jGetWindow("Cattle Info")){
+	jAbsClick(jMyCoords(), 1, 0);
+	jSleep(1000);
+	}
+	do {
+		jOffsetClick(jCoord(getRandomArbitary(-2,2),getRandomArbitary(-2,2)),1,0);
+		goNearPosition(animal.position(), 1);
+		jSleep(500);
+		jDoClick(animal.getID(), 3, 0);
+		jWaitPopup(3000);
+		jSelectContextMenu("Slaughter");
+		jSleep(1000);
+		jToConsole("Tried to kill cattle");
+		jSleep(1000);
+		}	while (!jHaveHourglass());
+		
+		while (jHaveHourglass()){
+		jSleep(1000);
+		}
+}
+
+while(1){
+	jSleep(500);
+	killAnimal(getNearest( "sheep/s"));
+}

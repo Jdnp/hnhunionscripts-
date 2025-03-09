@@ -1,0 +1,86 @@
+//#! uniq = oretaker	
+//#! name = Ore Taker
+//#! icon = gfx/invobjs/ore-iron
+include("jBotAPITalon");
+include("jBotAPIArcanist");
+include("jBotAPI");
+include("pathfinder");
+include("jBotErik");
+main();
+
+function takeItemsToContainers (itemlist, containerlist, containerwindow, radius) {
+jAbsClick(jMyCoords(), 1, 0);
+if (radius == null) radius = 1;
+var out = 0;
+while (checkInventory().getItems(itemlist).length > 0) {
+		var inventory = checkInventory();
+		while (!jGetWindow(containerwindow)){
+			goNearPosition(containerlist[0].position(), radius);
+			waitPFEndMove();
+			var mycoords = jMyCoords();
+			jDoClick(containerlist[0].getID(),3,0);
+			jSleep(1500);
+		}
+		if (jGetWindow(containerwindow) != null){
+			if ( jGetWindow(containerwindow).getInventories()[0].freeSlotsCoords().length > 0) {
+			jToConsole("Putting Items into the Container");
+			if (checkInventory().getItems(itemlist).length > 0)
+				inventory.getItems(itemlist)[0].transferSuchAll();
+			jSleep(500); 
+			}
+			
+			else {
+				containerlist.splice(out, 1);
+				jToConsole("Deleted Full Container");
+				//out++;
+				jSleep(500);
+			}
+			jAbsClick(mycoords, 1, 0);
+			
+		}
+		jSleep(1000);
+
+}
+return containerlist;
+}
+
+function main(){
+	var smelters = jGetObjects(50, jCoord(0, 0), "smelter");
+	while(1){
+		var startposition = jMyCoords();
+		while(checkInventory().freeSlots() > 0){
+			var resname = "ore-iron";
+			var obj = jFindObjectByName(resname, 50);
+			while (obj == null) {
+				jSleep(1000);
+				var obj = jFindObjectByName(resname, 50);
+			}
+			while (obj != 0 && checkInventory().freeSlots() > 0) {
+				var obj = jFindObjectByName(resname, 50);
+				while (obj == null) {
+				jSleep(1000);
+				var obj = jFindObjectByName(resname, 50);
+				}
+				if (!jIsPathFree(obj.position())){
+					goNearPosition(obj.position(), 0)
+				}
+			   jDoClick(obj.getID(), 3, 0);
+			   jWaitMove(1000);
+			   jSleep(100);
+			   if (jGetDraggingItem()) {
+			      jDropObject(0);
+			      break;
+			   }
+
+			   
+			}
+		}
+		
+		while (smelters == null){
+			jAbsClick(jMyCoords(), 1, 0);
+			jSleep(1000);
+			var smelters = jGetObjects(50, jCoord(0, 0), "smelter");
+		}
+		takeItemsToContainers ("ore-iron", smelters, "Ore Smelter", 2);
+	}
+}

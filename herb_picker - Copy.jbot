@@ -1,0 +1,21 @@
+//#! name = Forragables auto pick up
+//#! tooltip = Automatically pick ups forragables around you, just get close to them and press!
+//#! icon = gfx/invobjs/mussel
+
+include("jBotAPI");
+
+function Main(){
+   while(true){
+      var mussels = jFindObjectByName("herb", 20);
+      if(mussels != null && checkInventory().freeSlots() > 0){
+      
+               jDoClick(mussels.getID(), 3, 0);
+               jSleep(100);
+                  
+               if(jWaitPopup(200)){jSelectContextMenu("Pick"); jWaitProgress(actionTimeout);}
+
+      }else{jToConsole("There isn't more stuff or space in the inventory!"); break;}
+   }
+}
+
+Main();

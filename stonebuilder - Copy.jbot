@@ -1,0 +1,103 @@
+//#! name = Stone builder
+//#! uniq = statues_arcanist
+//#! icon = gfx/terobjs/cstatue
+
+//include("jBotAPITalon");
+include("jBotAPIArcanist");
+include("jBotAPI");
+include("pathfinder");
+
+function Idol(){
+	this.signwindow = "Village Claim";
+	this.signval = 4;
+	this.radius = 2;
+}
+function Statue(){
+	this.signwindow = "Statue of the Chiefton";
+	this.signval = 1;
+	this.radius = 1;
+}
+function Mansion(){
+	this.signwindow = "Stone Mansion";
+	this.signval = 1;
+	this.radius = 5;
+}
+
+function getNearestRock() {
+   var trees = jGetObjects(40, jCoord(0, 0), ["bumlings"]);
+   var min_len = 100500; 
+   var objid = 0;
+   for (var i = 0; i < trees.length; i++) {
+      if (trees[i].position().dist(jMyCoords()) < min_len) {
+         objid = trees[i];
+         min_len = trees[i].position().dist(jMyCoords());
+      }
+   }
+   return objid;
+}
+
+
+function buildstatue(item) {
+var sign = jSelectObject("Select " + item.signwindow);
+//sign.push([]);
+while (1){
+	if(jGetWindow("Inventory").getInventories()[0].getItems("stone")[0] == null){
+		var stonefound = true;
+		while(jGetWindow("Inventory").getInventories()[0].freeSlots() != 0 && stonefound == true){
+			var target_stone = jFindObjectByName("items/stone", 25);
+			if(target_stone == null){
+				var stonefound = false;
+			}
+			if(stonefound == true){
+				jPFMoveOffset_LX(target_stone.position(), 1);
+				waitPFEndMove();
+				jDoClick(target_stone.getID(), 3, 0);
+			}
+			else {
+			var rock =  getNearestRock();
+			var rock_coord = rock.position();
+			if ( jIsPathFree(rock_coord) ) {}
+			else {
+				jPFMoveOffset_LX(rock_coord, 2);
+				//waitPFEndMove();
+				}
+			jDoClick(rock.getID(), 3, 0);
+			if (jWaitPopup(actionTimeout)) {
+			jSleep(1000);
+			jSelectContextMenu("Chip stone");
+			jWaitStartProgress();
+			while(jGetWindow("Inventory").getInventories()[0].freeSlots() >1 ){jSleep(100);}
+			jMoveStep(jCoord(0, 2));
+			waitPFEndMove();
+			dropFromCursor(1);
+			drinkWater();
+			} } 
+		}
+	}	
+	jSleep(200);
+	putItemsToSign("stone", sign, item.signwindow, item.radius, item.signval);
+	
+}
+                    }
+					
+
+
+function main() {
+	
+   jDropLastWindow();
+   var blist = ["Idol", "Statue", "Mansion", "Exit"];
+   var selectWindow = jGUIWindow(jCoord(250, 250), jCoord(110, blist.length * 25 + 15), "Chipper");
+   var label = jGUILabel(selectWindow, jCoord(5, 5), "Select sign type:");
+   for(var i = 0; i < blist.length; i++)
+      jGUIButton(selectWindow, jCoord(5, 25 + i*25),  100, blist[i]);
+   selectWindow.toggleCloseButton();
+   var btext = selectWindow.waitButtonClick();
+   if(btext == blist[0]) item = new Idol();
+   if(btext == blist[1]) item = new Statue();
+   if(btext == blist[2]) item = new Mansion();
+   if(btext == blist[blist.length - 1]) {selectWindow.destroy(); return;}
+   selectWindow.destroy();
+   buildstatue(item);
+}
+
+main();

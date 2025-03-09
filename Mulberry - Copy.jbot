@@ -1,0 +1,419 @@
+    //#! name = leaf factory
+    //#! uniq = leaf_factory_by_thebender
+    //#! icon = gfx/invobjs/mulberryleaf
+
+    var mulberry = null
+    var house = null
+    var count = 0;
+    var all_cupboard = 0;
+	var cupboards = null;
+	var start = 0
+
+    function getRandomArbitary(min, max)
+    {
+      return Math.random() * (max - min) + min;
+    }
+
+	function waitPFEndMove(){
+	jWaitStartMove(300);
+	jSleep(100);
+	while (true) {
+		jWaitEndMove(10000);
+		jSleep(200);
+		if (!jIsMoving()) {
+			return;
+		}
+	}
+}
+	
+    function jPFMove_LX(point) {
+       point = jTilify(point);
+       var MyX = jMyCoords().x;
+       var MyY = jMyCoords().y;
+         
+       jPFMove(point);
+       cycles = 0;
+       while (MyX != point.x || MyY != point.y)
+       {
+          jPrint("jPFMove_LX My =" + MyX + " " + MyY + " - " + point.x + " " + point.y);
+          jSleep(1000);
+          MyX = jMyCoords().x;
+          MyY = jMyCoords().y;
+          if(cycles == 20)
+          {     
+             jPrint("jPFMove_LX trying to move again");
+             jOffsetClick(jCoord(getRandomArbitary(-2,2),getRandomArbitary(-2,2)),1,0);
+             jSleep(500);
+             jPFMove(point);
+             cycles = 0
+          }
+          cycles++;
+       }
+       jPrint("jPFMove ended");
+    }
+
+    function jPFMoveOffset_LX(point, offset) {
+
+       offsMoveS=jCoord(0,offset);
+       offsMoveE=jCoord(offset,0);
+       offsMoveW=jCoord(-offset,0);
+       offsMoveN=jCoord(0,-offset);
+       
+       while (1) {
+          if(jPFMove(point.add(offsMoveN.mul(11))) > 0) {
+             jPFMove_LX(point.add(offsMoveN.mul(11)));
+          return offsMoveN;
+          }
+
+          if(jPFMove(point.add(offsMoveS.mul(11))) > 0) {
+             jPFMove_LX(point.add(offsMoveS.mul(11)));
+             return offsMoveS;
+          }
+         
+          if(jPFMove(point.add(offsMoveE.mul(11))) > 0) {
+             jPFMove_LX(point.add(offsMoveE.mul(11)));
+          return offsMoveE;
+          }
+         
+          if(jPFMove(point.add(offsMoveW.mul(11))) > 0) {
+             jPFMove_LX(point.add(offsMoveW.mul(11)));
+          return offsMoveW;
+          }   
+         
+          jPrint("jPFMoveOffset_LX can't find path");
+    //      break;
+
+             jOffsetClick(jCoord(getRandomArbitary(-2,2),getRandomArbitary(-2,2)),1,0);
+             jSleep(500);
+         
+       }
+    }
+
+    function checkInventory() {
+       if(!jHaveWindow("Inventory")) {
+          jToggleInventory();
+          while(!jHaveWindow("Inventory"))
+             jSleep(100);
+       }
+       return jGetWindow("Inventory").getInventories()[0];
+    }
+
+    function choise_mulberry() {
+       if (mulberry == null) {
+          var select_mulberry = jSelectObject("Select mulberry tree");
+          var mulberry = jFindObjectByName(select_mulberry.name(), 50);
+          if (mulberry == null) {
+             jToConsole("Mulberry not found! Script stoped.");
+             jExit();
+          }
+       }
+       return mulberry;
+    }
+
+    function choise_house() {
+       if (house == null) {
+          var select_house = jSelectObject("Select house door");
+          var house = jFindObjectByName(select_house.name(), 50);
+          if (house == null) {
+             jToConsole("House not found! Script stoped.");
+             jExit();
+          }
+       }
+       return house;
+    }
+
+    function go_for_leafs(tree) {
+       inventory = checkInventory();
+       var house_outside = jFindObjectByName("arch/inn", 50);
+       while (house_outside = null) {
+          jSleep(100);
+       }
+       if (inventory.freeSlots() > 2) {
+          jPFMoveOffset_LX(tree.position(), 1);
+		  waitPFEndMove();
+          jDoClick(tree.getID(),3,0);
+          jWaitPopup(1000);
+          jSelectContextMenu("Pick leaf");
+          while (inventory.freeSlots() > 3) {
+//		  jToConsole(inventory.freeSlots());
+             jSleep(1100);
+          }
+       }
+    }
+
+    function go_to_cellar(door) {
+       //*
+	   jPFMoveOffset_LX(door.position(), 1);
+	   waitPFEndMove();
+       jSleep(1000);//*/
+       jDoClick(door.getID(),3,0);
+       jSleep(500);//*/
+       jToConsole("I'm in house");
+
+       var cellar_door = jFindObjectByName("arch/door-cellar", 50);
+       while (cellar_door == null) {
+          jSleep(100);
+          var cellar_door = jFindObjectByName("arch/door-cellar", 50);
+       }
+       jDoClick(cellar_door.getID(),3,0);
+       jSleep(100);
+       var cellar_stairs = jFindObjectByName("arch/stairs-cellar", 50);
+       while (cellar_stairs == null) {
+          jSleep(100);
+          var cellar_stairs = jFindObjectByName("arch/stairs-cellar", 50);
+       }
+       jToConsole("I'm in cellar");
+       jSleep(1000);/**/
+    }
+	
+    function go_to_top(door) {
+       //*
+	   jPFMoveOffset_LX(door.position(), 1);
+       jSleep(1000);//*/
+       jDoClick(door.getID(),3,0);
+       jSleep(500);//*/
+       jToConsole("I'm in house");
+
+       var inn_stairs = jFindObjectByName("arch/stairs-inn", 50);
+       while (inn_stairs == null) {
+          jSleep(100);
+          var inn_stairs = jFindObjectByName("arch/stairs-inn", 50);
+       }
+	   jPFMoveOffset_LX(inn_stairs.position(), 1);
+	   waitPFEndMove();
+	   jSleep(1000);
+       jDoClick(inn_stairs.getID(),3,0);
+       jSleep(100);
+       var inn_stairs_d = jFindObjectByName("arch/stairs-inn-d", 50);
+       while (inn_stairs_d == null) {
+          jSleep(100);
+          var inn_stairs_d = jFindObjectByName("arch/stairs-inn-d", 50);
+       }
+       jToConsole("I'm on the top Floor");
+       jSleep(1000);/**/
+    }
+	
+	    function go_to_house(door) {
+       //*
+	   jPFMoveOffset_LX(door.position(), 1);
+	   waitPFEndMove();
+       jSleep(1000);//*/
+       jDoClick(door.getID(),3,0);
+       jSleep(500);//*/
+       jToConsole("I'm in house");
+       jSleep(1000);/**/
+	   
+	   var cellar_door = jFindObjectByName("arch/door-cellar", 50);
+       while (cellar_door == null) {
+          jSleep(100);
+          var cellar_door = jFindObjectByName("arch/door-cellar", 50);
+       }
+    }
+	
+    function transfer_leafs() {
+          var inventory = checkInventory();
+          var open_cupboard = jGetWindow("Cupboard").getInventories()[0];
+          //var silkworms = open_cupboard.getItems("invobjs/silkworm");
+          var leafes_cupboard = open_cupboard.getItems("invobjs/mulberryleaf");
+          var freeSlot = open_cupboard.freeSlotsCoords();
+		  if (freeSlot.length > 12 /*&& leafes_cupboard.length != 52*/) {
+             var leafes_inventory = inventory.getItems("invobjs/mulberryleaf");
+             if (leafes_inventory.length > 52 - freeSlot.length) {
+                for (var j = freeSlot.length; j > 12; j--) {
+					transferLeaf(open_cupboard);
+                }
+             } else {
+                while (leafes_inventory.length > 0) {
+                   transferLeaf(open_cupboard);
+                }
+             }//*/
+          }
+    }
+
+	function transferLeaf(open_cupboard){
+	   var freeSlot = open_cupboard.freeSlotsCoords()[0];
+	   var leafes_inventory = inventory.getItems("invobjs/mulberryleaf");
+	   leafes_inventory[0].take();
+	   jWaitDrag();
+	   open_cupboard.drop(freeSlot);
+	   jWaitDrop();
+	}
+	
+    function go_to_cupboard() {
+	try{
+       if (cupboards == null) {
+          cupboards = jGetObjects(50, jCoord(0, 0), "terobjs/cupboard");
+          all_cupboard = cupboards.length
+       }
+       cupboards = jGetObjects(50, jCoord(0, 0), "terobjs/cupboard");
+          for (var i = count; i < cupboards.length; i++) {
+             var leafes_inventory = inventory.getItems("invobjs/mulberryleaf");
+             if (leafes_inventory.length > 0) {
+                jPFMoveOffset_LX(cupboards[i].position(), 1);
+                jDoClick(cupboards[i].getID(),3,0);
+                jSleep(1000);
+                var open_cupboard = jGetWindow("Cupboard");
+                while (open_cupboard == null) {
+                   jPFMoveOffset_LX(cupboards[i].position(), 1);
+                   jDoClick(cupboards[i].getID(),3,0);
+                   jSleep(1000);
+                   var open_cupboard = jGetWindow("Cupboard");
+                }
+                transfer_leafs();
+                jSleep(500);
+                //var silkworms = jGetWindow("Cupboard").getInventories()[0].getItems("invobjs/silkworm");
+//                var leafes_cupboard = jGetWindow("Cupboard").getInventories()[0].getItems("invobjs/mulberryleaf");
+                if (jGetWindow("Cupboard").getInventories()[0].freeSlotsCoords().length <= 12) {
+                   count++;
+                   jToConsole(count);
+                }
+             }else{
+			 //break;
+			 }
+             //jToConsole(count);
+          }
+             jToConsole("done cupb...");
+			 }
+			 catch(e)
+			 {
+			 jToConsole(e.message);
+			 }
+    }
+
+
+    function go_out_cellar() {
+      var cellar_stairs = jFindObjectByName("arch/stairs-cellar", 50);
+       jPFMoveOffset_LX(cellar_stairs.position(), 1);
+	   waitPFEndMove();
+       jDoClick(cellar_stairs.getID(),3,0);
+       jSleep(1000);
+       //jToConsole("I'm in house");//*/
+	   jToConsole("I'm in house");
+       var out_door = jFindObjectByName("arch/door-inn", 50);
+		//jToConsole(out_door);
+       while (out_door == null) {
+          jSleep(100);
+          var out_door = jFindObjectByName("arch/door-inn", 50);
+       }
+       jToConsole("I'm out!");
+       //jPFMoveOffset_LX(out_door.position(), -2);
+       jDoClick(out_door.getID(),3,0);
+       if (count == all_cupboard) {
+	   jToConsole("All Cupboards Done");
+          jExit();
+		  jSleep(10000);
+       }
+       jSleep(5000);
+    }
+	
+   function go_out_middle() {
+	   var out_door = jFindObjectByName("arch/door-inn", 50);
+       jPFMoveOffset_LX(out_door.position(), -2);
+	   waitPFEndMove();
+       if (count == all_cupboard) {
+	   jToConsole("All Cupboards Done");
+          jExit();
+		  jSleep(10000);
+       }
+	   jDoClick(out_door.getID(),3,0);
+	   jToConsole("I'm out!");
+       
+       jSleep(5000);
+    }
+	
+   function go_out_top() {
+      var inn_stairs_d = jFindObjectByName("arch/stairs-inn-d", 50);
+       jPFMoveOffset_LX(inn_stairs_d.position(), 1);
+       jDoClick(inn_stairs_d.getID(),3,0);
+       jSleep(1000);
+       //jToConsole("I'm in house");//*/
+	   jToConsole("I'm in house");
+       var out_door = jFindObjectByName("arch/door-inn", 50);
+		//jToConsole(out_door);
+       while (out_door == null) {
+          jSleep(100);
+          var out_door = jFindObjectByName("arch/door-inn", 50);
+       }
+       jToConsole("I'm out!");
+       jPFMoveOffset_LX(out_door.position(), 2);
+	   waitPFEndMove();
+       if (count == all_cupboard) {
+	   jToConsole("All Cupboards Done");
+          jExit();
+		  jSleep(10000);
+       }
+       jDoClick(out_door.getID(),3,0);
+
+       jSleep(5000);
+    }
+
+    function main_cellar() {
+
+	    var mul = choise_mulberry();
+		var inn = choise_house();
+
+		do{
+			go_for_leafs(mul);
+			jSleep(1000);
+			go_to_cellar(inn);
+			jSleep(1000);
+			go_to_cupboard();
+			jSleep(1000);
+			go_out_cellar();
+		}
+		while(count < all_cupboard)
+    }
+	
+    function main_middle() {
+
+	    var mul = choise_mulberry();
+		var inn = choise_house();
+
+		do{
+			go_for_leafs(mul);
+			jSleep(1000);
+			go_to_house(inn);
+			jSleep(1000);
+			go_to_cupboard();
+			jSleep(1000);
+			go_out_middle();
+		}
+		while(count < all_cupboard)
+    }
+	
+    function main_top() {
+
+	    var mul = choise_mulberry();
+		var inn = choise_house();
+
+		do{
+			go_for_leafs(mul);
+			jSleep(1000);
+			go_to_top(inn);
+			jSleep(1000);
+			go_to_cupboard();
+			jSleep(1000);
+			go_out_top();
+		}
+		while(count < all_cupboard)
+    }
+	
+	
+	function main() {
+   jDropLastWindow();
+   var blist = ["Cellar", "Ground Floor","Top Floor", "Exit"];
+   var selectWindow = jGUIWindow(jCoord(250, 250), jCoord(110, blist.length * 25 + 15), "Silkier");
+   for(var i = 0; i < blist.length; i++)
+      jGUIButton(selectWindow, jCoord(5, 25 + i*25),  100, blist[i]);
+   selectWindow.toggleCloseButton();
+   var btext = selectWindow.waitButtonClick();
+   selectWindow.destroy();
+   if(btext == blist[0]) harvester = new main_cellar(); 
+   if(btext == blist[1]) harvester = new main_middle();
+   if(btext == blist[2]) harvester = new main_top();
+   if(btext == blist[blist.length - 1]) {selectWindow.destroy(); return;};
+   
+   }
+    //while(1) {
+       main();
+    //}

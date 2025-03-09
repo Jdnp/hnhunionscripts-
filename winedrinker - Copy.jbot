@@ -1,0 +1,10 @@
+//#! uniq = arcanist_drinker
+//#! name = Cupboard Builder
+//#! icon = gfx/invobjs/glass-winef
+
+include("pathfinder");
+include("jBotAPI");
+include("jBotErik");
+include("jBotAPIArcanist");
+
+drinkWine();

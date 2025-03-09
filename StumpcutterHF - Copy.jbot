@@ -1,0 +1,185 @@
+//#! uniq = STUMPCUTTERHF
+//#! tooltip = Removes stumps.
+//#! name = Stumpcutter HF
+
+//#! icon = gfx/terobjs/trees/fir/stump
+//---#! icon = gfx/invobjs/small/log
+
+include("jBotAPI");
+
+///////////////////////////////////////////////////
+function Finish(itext)
+{
+	jPrint("Exit - "+itext);
+	jExit();
+}
+
+function DropFromCursor()
+{
+	while (jIsDragging())
+	{
+		jDropObject(0);
+		jSleep(300);
+	}
+}
+function DropWoodBlocksFromInv()
+{
+	var inv = checkInventory();
+	var items = inv.getItems("wood");
+	if (items.length > 0)
+	{	
+		items[0].dropSuchAll();
+		//waits dropping
+		while (inv.getItems("wood").length > 0) jSleep(300);
+	}
+}
+function DropFromInv(resName)
+{
+	var inv = checkInventory();
+	var items = inv.getItems(resName);
+	if (items.length > 0)
+	{	
+		items[0].dropSuchAll();
+		//waits dropping
+		while (inv.getItems(resName).length > 0) jSleep(300);
+	}
+}
+function FromCursorToInv(resName)
+{
+	DropFromCursor();
+	var res = jFindObjectByName(resName, 1);
+	if (res != null)
+	{
+		res.doClick(3, 0);
+		jSleep(500);
+		if (jIsDragging()) DropFromCursor();
+	}
+}
+function GetInvFree()
+{
+	var inv = checkInventory();
+	return inv.freeSlots();
+}
+function GetInvResCount(resName)
+{
+	var inv = checkInventory();
+	var invItems = inv.getItems(resName);
+	return invItems.length;
+}
+function GetWindow(objWndName)
+{
+	var wnd;
+	while (true)
+	{
+		wnd = jGetWindow(objWndName);
+		if (wnd != null) return wnd;
+		jSleep(300);
+	}
+}
+
+//---------------------------------------------------------------------
+// chop trees
+//---------------------------------------------------------------------
+
+function RemoveStump(stump)
+{
+	resetCursor();
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+
+	drinkWater();
+
+	stump.doClick(3, 0);
+	jWaitPopup(actionTimeout);
+	if (jHavePopup())
+	{
+		jSelectContextMenu("Remove");
+		jWaitProgress(actionTimeout);
+	}
+
+	DropFromCursor();
+	DropWoodBlocksFromInv();
+}
+
+function TakeLog()
+{
+	var offsetAround = [[11, 11], [11, 0], [11, -11], [0, 11], [0, -11], [-11, 11], [-11, 0], [-11, -11]];
+	var treesList = ["/stump"];
+
+	var initPos = jMyCoords();
+
+	while (true)
+	{
+		jSleep(1000);
+
+		MoveRandomDirectionSafe(3);
+
+		// no log avaliable - chop tree and remove stumps
+		treeEnd:
+		for (var k = 0; k < treesList.length; k++)
+		{
+			var treesAll = jGetObjects(75, jCoord(0, 0), treesList[k]);
+			for (var i = 0; i < treesAll.length; i++)
+			{
+				var tree = treesAll[i];
+
+				var num = -1;	
+				for (var n = 0; n < offsetAround.length; n++)
+				{
+					var pos = jCoord(tree.position().x + offsetAround[n][0], tree.position().y + offsetAround[n][1]);
+					if (jIsPathFree(pos))
+					{
+						num = n;
+						break;
+					}
+				}	
+				if (num == -1) continue;
+
+//				var startPos = jMyCoords();
+
+				var pos = jCoord(tree.position().x + offsetAround[num][0], tree.position().y + offsetAround[num][1]);
+				MoveToPosSafe(pos);
+
+				RemoveStump(tree);
+		
+//				MoveToPosSafe(startPos);
+
+				break treeEnd;
+			}
+		}
+	}
+	Finish("no more trees in range");
+}
+
+function ChopAndDeliverTrees()
+{
+	var equip = checkEquipment();
+	var shovelEquipped = false;
+	if (equip.name(6) == "Shovel") shovelEquipped = true;
+
+	var inv = checkInventory();
+	var axe = inv.getItems("axe");
+	var shovel = inv.getItems("shovel");
+	if (!shovelEquipped)
+	{
+		sayArea("Need shovel in hands!");
+		Finish("Must be equipped with shovel.");
+	}
+
+	jSetSpeed(1);
+	TeleportHF();
+	while (true)
+	{
+		TakeLog();
+	}
+}
+
+//---------------------------------------------------------------------
+function main()
+{
+	jDropLastWindow();
+
+	ChopAndDeliverTrees();
+}
+
+main();

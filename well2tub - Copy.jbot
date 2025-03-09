@@ -1,0 +1,147 @@
+//#! name = Well to Tub
+//#! uniq = WELLTOTUBBOT
+//#! icon = gfx/terobjs/ttub
+
+include("pathfinder");
+include("jBotAPI");
+include("jBotAPIArcanist");
+include("jBotErik");
+//function checks inventory
+//and opens it, if it closed
+function checkInventory()
+{
+   if(!jHaveWindow("Inventory"))
+   {
+      jToggleInventory();
+      while(!jHaveWindow("Inventory"))
+         jSleep(100);
+   }
+}
+/*
+function fill_Bucket(){
+
+}
+*/
+//like main() at C
+
+function selectTubs() {
+   var ta = [];
+   var ids = []
+   while (1) {
+      var trough = jSelectObject("Select tanning tub, click on the ground to stop selecting");
+      if (trough == null) break;
+      var name = trough.name();
+      if (name.indexOf("ttub") != -1) {
+         if (ids.indexOf(trough.getID()) != -1) {
+            jToConsole("ERROR: This tub has been already selected.");
+            continue;
+         }
+         ta.push(trough);
+         ids.push(trough.getID());
+         jToConsole("Tubs count: " + ta.length);
+      }
+      else break;
+   }//troughs
+   return ta;
+}
+
+function main()
+{
+   
+   var RAD = 6;
+   var well = jFindObjectByName("well", 10); //well
+   var barrels = selectTubs(); //jGetObjects(RAD, jCoord(0, 0), "ttub"); //array of barrels
+   jPrint("barrels = " + barrels.length);
+   if(barrels[0] == 0)
+      {
+         jPrint("Cannot find tanning tubs. Script failed.");
+         return;
+      }
+   //if no wells around
+   if(!well)
+   {
+      jPrint("Cannot find a well. Script failed.");
+      return;
+   }
+   //well founded
+   checkInventory();
+   for(i=0;i<barrels.length;i++)
+   {
+   //if no barrels at array
+   if(barrels[i] == 0) {
+      jPrint("barrels[i] == 0");
+      break;
+   }
+   var j=0;
+   while(1)
+   {
+        jPrint("WHILE WHILE");
+         
+		if (jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0] == undefined){
+			  if (jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0] == undefined){
+				jToConsole("No bucket in inventory. Script stopped");
+				jExit();
+			  }
+			  else{
+				jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0].iact();
+				jWaitPopup();
+				jSelectContextMenu("Empty");
+				while (jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0] == undefined){
+				  jSleep(100);
+				}
+			  }
+		   }
+				 
+         var bucket = jGetWindow("Inventory").getInventories()[0].getItems("buckete")[0];
+         jPrint("WHILE 2");
+         if(bucket == null) {
+            jPrint("bucket == null");
+            break;
+         }
+		 jPrint("WHILE 3");
+         var bc = bucket.coord();
+         jPrint("bc = " + bc);
+         bucket.take();
+         jWaitDrag(5000);
+         jSleep(100);
+         tile = goNearPosition(well.position(),1);
+         well.interactClick(0);
+         var drag = jGetDraggingItem();
+         //waits for the filled bucket
+         while(drag.resName().indexOf("water") == -1)
+            jSleep(100);
+         jGetWindow("Inventory").getInventories()[0].drop(bc);
+         jWaitDrop(5000);
+         jSleep(100);
+         tile = jPFMoveOffset_LX(barrels[i].position(),1);
+		 /*
+         jDoClick(barrels[i].getID(), 3, 0);
+         //waits for barrel window
+         jWaitWindow("Tanning Tub");
+         jSleep(1000);
+		 */
+		 j++;
+		 if(j > 6)
+		 {
+			j=0;
+			break;
+		 }
+         var bucket2 = jGetWindow("Inventory").getInventories()[0].getItems("bucket-water")[0];
+         var bc2 = bucket2.coord();
+         bucket2.take();
+         jWaitDrag(5000);
+         tile = jPFMoveOffset_LX(barrels[i].position(),1);
+         barrels[i].interactClick(0);
+         var drag2 = jGetDraggingItem();
+            jSleep(1000);
+         jGetWindow("Inventory").getInventories()[0].drop(bc2);
+         jWaitDrop(5000);
+         jSleep(100);
+         jAbsClick(barrels[i].position().add(tile.mul(11)), 1, 0);
+      }//while 1
+   }//for all barrels
+}
+
+//calls the main
+jDropLastWindow();
+main();

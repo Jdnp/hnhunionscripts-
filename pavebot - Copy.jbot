@@ -1,0 +1,120 @@
+//#! name = Paverbot
+//#! tooltip = Paves plowed tiles
+//#! uniq = PAVERBOT
+var actionTimeout = 1000 * 60 * 1;
+var hartling = jMyCoords();   
+var inventory = checkInventory2();
+var player = jGetObjects(1,0,"borka");
+var drunk = 0;
+var logcount = 0;
+var winecount = 0;
+var count = 0;
+var log = 0
+include("pathfinder");
+include("jBotAPI");
+include("jBotAPIArcanist");
+include("jBotErik");
+
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+
+function checkInventory2() {
+    if(!jHaveWindow("Inventory")) {
+        jToggleInventory();
+        while(!jHaveWindow("Inventory"))
+            jSleep(100);
+    }
+    return jGetWindow("Inventory").getInventories()[0];
+}
+
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+/* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
+function main(){
+    var player = jFindObjectByName("borka", 1);
+    jPFMove(player.position());
+    jSleep(250);
+    var rect = selectAreaInRect_Decider("Select area to pave");
+    var topleft_coord = rect[0];
+    var bottomright_coord = rect[3];
+    var rock = jSelectObject("Select Rock");
+	var rock_coord = rock.position();
+	var rock_coord = rock.position();
+    var widthtiles = Math.floor((bottomright_coord.x-topleft_coord.x)/11)
+    var heighttiles = Math.floor((bottomright_coord.y-topleft_coord.y)/11)
+    for (var height=0;height<=heighttiles;height++){
+        for (var width=0;width<=widthtiles;width++){
+            var thistile = jCoord(Math.floor((topleft_coord.x+width*11+1-player.position().x)/11),Math.floor((topleft_coord.y+height*11+1-player.position().y)/11))
+            if(jGetTileType(thistile) == 9 || jGetTileType(thistile) == 14 
+            || jGetTileType(thistile) == 19|| jGetTileType(thistile) == 25|| jGetTileType(thistile) == 26){//9,14,19,26,25
+                checkInventory();
+                //PICKUP STONES IF NONE IN INVENTORY
+                jSleep(200);
+                if(jGetWindow("Inventory").getInventories()[0].getItems("stone")[0] == null){
+                    var stonefound = true;
+                    while(jGetWindow("Inventory").getInventories()[0].freeSlots() != 0 && stonefound == true){
+                        var target_stone = jFindObjectByName("items/stone", 25);
+                        if(target_stone == null){
+                            var stonefound = false;
+                        }
+                        if(stonefound == true){
+                            jPFMoveOffset_LX(target_stone.position(), 1);
+                            waitPFEndMove();
+                            jDoClick(target_stone.getID(), 3, 0);
+                            jSleep(500);
+                        }
+                        else {
+                            do{
+                                goNearPosition(rock.position(), 2);
+                                jDoClick(rock.getID(), 3, 0);
+                                jWaitPopup(actionTimeout);
+                                jSelectContextMenu("Chip stone");
+                                jWaitStartProgress();
+                                while(jHaveHourglass()){jSleep(100);}
+                                jMoveStep(jCoord(0, 2));
+                                waitPFEndMove();
+                                drinkWater();
+                            } while(jGetWindow("Inventory").getInventories()[0].freeSlots() >1 )
+                             jPrint("Finished do while #79");
+                             dropFromCursor(0);
+                        } 
+                    }
+                jSleep(200);
+                goNearPosition(jCoord(topleft_coord.x+width*11,topleft_coord.y+height*11), 0);
+                
+                }
+
+                // END OF PICKUP STONES
+                if ( jIsPathFree(jCoord(topleft_coord.x+width*11,topleft_coord.y+height*11) ) ) {}
+                        else {
+                            jPFMoveOffset_LX(jCoord(topleft_coord.x+width*11,topleft_coord.y+height*11), 0);
+                            waitPFEndMove();
+                            }
+                jSleep(100);
+                jAbsClick(jCoord(topleft_coord.x+width*11,topleft_coord.y+height*11),1,0);
+                jWaitMove(25000);
+                jSleep(100);
+                if (jGetHungry() < 55) { jLogout(); jExit(); }
+                if(jGetTileType(0,0) != 8){
+                    drinkWater();
+                    jSendDoubleAction("stoneroad","stone");
+                    jWaitCursor("dig",1500);
+                    jSleep(100);
+                    jAbsClick(jCoord(topleft_coord.x+width*11,topleft_coord.y+height*11),1,0);
+                    jSleep(200);
+                    jWaitProgress(10000);
+                    jSleep(100);
+                    jAbsClick(player.position(),3,0);
+                }
+                jSleep(100);
+            }
+        }
+    }
+}
+
+main();
